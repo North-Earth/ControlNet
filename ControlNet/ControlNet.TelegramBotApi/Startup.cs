@@ -25,6 +25,11 @@ namespace ControlNet.TelegramBotApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var token = Configuration.GetValue<string>("BotSettings:Token");
+            var hookUrl = Configuration.GetValue<string>("BotSettings:HookUrl");
+
+
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
