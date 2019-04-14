@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ControlNet.TelegramBotApi.Controllers
 {
@@ -6,10 +7,24 @@ namespace ControlNet.TelegramBotApi.Controllers
     [ApiController]
     public class HomeController : ControllerBase
     {
+
+        #region Fields
+
+        #endregion
+
+        #region Constructors
+
+        public HomeController() { }
+
+        #endregion
+
         #region Methods
 
         [HttpGet]
-        public string Get() => "Hello! I'm Telegergam Bot API. :)";
+        public async Task<string> Get()
+        {
+            return "Hello! I'm Telegergam Bot API. :)";
+        }
 
         #endregion
     }

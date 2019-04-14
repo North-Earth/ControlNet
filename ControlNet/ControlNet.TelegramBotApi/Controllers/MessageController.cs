@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ControlNet.TelegramBotApi.Models.Services.BotService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Telegram.Bot.Types;
 
 namespace ControlNet.TelegramBotApi.Controllers
 {
@@ -13,14 +15,14 @@ namespace ControlNet.TelegramBotApi.Controllers
     {
         #region Fields
 
+        private readonly IBot _bot;
+
         #endregion
 
         #region Constructors
 
-        public MessageController()
-        {
-
-        }
+        public MessageController(IBot bot) 
+            => _bot = bot;
 
         #endregion
 
@@ -32,6 +34,11 @@ namespace ControlNet.TelegramBotApi.Controllers
         {
             return Ok();
         }
+
+        // POST: api/Message
+        [HttpPost]
+        public async Task Post([FromBody] Update update) 
+            => await _bot.MessageHandling(update);
 
         #endregion
     }
