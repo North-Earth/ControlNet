@@ -27,7 +27,6 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
         public async Task MessageHandling(Update update)
         {
             await _client.SendTextMessageAsync(chatId: update.Message.Chat, text: "You said:\n" + update.Message.Text);
-
         }
 
         public async Task SendMessage(int chatId, string message)

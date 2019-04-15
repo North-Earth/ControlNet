@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using ControlNet.TelegramBotApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ControlNet.TelegramBotApi.Controllers

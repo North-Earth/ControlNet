@@ -1,4 +1,5 @@
-﻿using ControlNet.TelegramBotApi.Models.Services.BotService;
+﻿using ControlNet.TelegramBotApi.Models;
+using ControlNet.TelegramBotApi.Models.Services.BotService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace ControlNet.TelegramBotApi
         {
             var token = Configuration.GetValue<string>("BotSettings:Token");
 
-            services.AddTransient<ITelegramBotClient>(t => new TelegramBotClient(token: token));
+            services.AddTransient<ITelegramBotClient>(t => new TelegramBotClient(token: BotSettings.Token));
             services.AddTransient<IBot, Bot>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
