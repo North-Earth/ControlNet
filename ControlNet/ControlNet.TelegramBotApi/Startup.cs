@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 using Telegram.Bot;
 
 namespace ControlNet.TelegramBotApi
@@ -21,12 +22,18 @@ namespace ControlNet.TelegramBotApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var token = Configuration.GetValue<string>("BotSettings:Token");
-
             services.AddTransient<ITelegramBotClient>(t => new TelegramBotClient(token: BotSettings.Token));
             services.AddTransient<IBot, Bot>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Resolve the services from the service provider.
+            var botService = serviceProvider.GetService<IBot>();
+            Task.Run(async () => await botService
+                .SetWebhookAsync(BotSettings.WebHookUrl + BotSettings.Token));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -7,6 +7,8 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
     {
         #region Methods
 
+        Task SetWebhookAsync(string webhookUrl);
+
         Task MessageHandling(Update update);
 
         Task SendMessage(int chatId, string message);
