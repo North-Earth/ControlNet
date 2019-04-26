@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting.WindowsServices;
 
 namespace ControlNet.MonitoringService
 {
@@ -19,6 +20,8 @@ namespace ControlNet.MonitoringService
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(loggerFactory => loggerFactory.AddEventLog()) // Send logs to the Windows Event Log.
+                .UseServiceBaseLifetime()
                 .ConfigureServices(services =>
                 {
                     services.AddHostedService<Worker>();
