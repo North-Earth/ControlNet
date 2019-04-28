@@ -11,7 +11,9 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
 
         Task MessageHandling(Update update);
 
-        Task SendMessage(int chatId, string message);
+        Task SendMessage(long chatId, string textMessage);
+
+        Task SendMessage(Message message);
 
         #endregion
     }

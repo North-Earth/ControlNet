@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting.WindowsServices;
+using ControlNet.MonitoringService.Models.Sevices;
+using ControlNet.MonitoringService.Models;
 
 namespace ControlNet.MonitoringService
 {
@@ -25,6 +27,7 @@ namespace ControlNet.MonitoringService
                 .ConfigureServices(services =>
                 {
                     services.AddHostedService<Worker>();
+                    services.AddTransient<IMonitoring, Monitoring>();
                 });
     }
 }

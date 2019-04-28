@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ControlNet.MonitoringService.Models
 {
-    internal static class BotSettings
+    internal static class AppSettings
     {
         #region Fields
 

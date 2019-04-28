@@ -23,7 +23,7 @@ namespace ControlNet.TelegramBotApi.Controllers
 
         #region Constructors
 
-        public MessageController(IBot bot) 
+        public MessageController(IBot bot)
             => _bot = bot;
 
         #endregion
@@ -41,8 +41,17 @@ namespace ControlNet.TelegramBotApi.Controllers
         // POST: api/Message/[Token]
         [HttpPost]
         [Route(BotSettings.Token)]
-        public async Task Post([FromBody] Update update) 
+        public async Task Post([FromBody] Update update)
             => await _bot.MessageHandling(update);
+
+        [HttpPost(BotSettings.Token + "/SendMessage")]
+        public async Task SendMessage(Message message)
+        {
+            var chatId = message.Chat.Id;
+            var textMessage = message.Text;
+
+            await _bot.SendMessage(chatId, textMessage);
+        }
 
         #endregion
     }

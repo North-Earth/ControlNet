@@ -34,9 +34,15 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
             await _client.SendTextMessageAsync(chatId: update.Message.Chat, text: "You said:\n" + update.Message.Text);
         }
 
-        public async Task SendMessage(int chatId, string message)
+        public async Task SendMessage(long chatId, string textMessage)
         {
-            await _client.SendTextMessageAsync(chatId: chatId, text: message);
+            await _client.SendTextMessageAsync(chatId: chatId, text: textMessage);
+        }
+
+        public Task SendMessage(Message message)
+        {
+            //TODO: Create parse message.
+            throw new System.NotImplementedException();
         }
 
         #endregion
