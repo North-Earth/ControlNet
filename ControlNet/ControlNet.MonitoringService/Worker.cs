@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using ControlNet.MonitoringService.Models;
@@ -21,12 +22,27 @@ namespace ControlNet.MonitoringService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _monitoring.StartServiceAsync();
+            await StartAsync();
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation($"Worker running at: {DateTime.Now}");
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(10000, stoppingToken);
+            }
+        }
+
+        private async Task StartAsync()
+        {
+            // Failed to send request when not all window services started.
+            await Task.Delay(millisecondsDelay: 30000);
+
+            try
+            {
+                await _monitoring.StartServiceAsync();
+            }
+            catch (Exception ex)
+            {
+                // TODO: Create logs.
             }
         }
     }

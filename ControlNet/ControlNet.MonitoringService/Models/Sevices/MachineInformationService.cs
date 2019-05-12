@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Threading.Tasks;
 
 namespace ControlNet.MonitoringService.Models.Sevices
@@ -10,9 +11,7 @@ namespace ControlNet.MonitoringService.Models.Sevices
 
         #region Fields
 
-        #endregion
-
-        #region Constructors
+        private static readonly string _queryBatteryInfo = "SELECT * FROM Win32_Battery";
 
         #endregion
 
@@ -22,6 +21,26 @@ namespace ControlNet.MonitoringService.Models.Sevices
         {
             var machineName = Environment.MachineName;
             return machineName;
+        }
+
+        public static string GetBatteryCharge()
+        {
+            var objectName = "EstimatedChargeRemaining";
+
+            var batteryCharge = ManagementInformationService
+                .GetManagementInformation(_queryBatteryInfo, objectName);
+
+            return batteryCharge;
+        }
+
+        public static string GetBatteryStatus()
+        {
+            var objectName = "BatteryStatus";
+
+            var batteryCharge = ManagementInformationService
+                .GetManagementInformation(_queryBatteryInfo, objectName);
+
+            return batteryCharge;
         }
 
         #endregion

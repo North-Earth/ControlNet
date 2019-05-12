@@ -23,7 +23,7 @@ namespace ControlNet.MonitoringService
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(loggerFactory => loggerFactory.AddEventLog()) // Send logs to the Windows Event Log.
-                .UseServiceBaseLifetime()
+                .UseWindowsService() // Rename UseServiceBaseLifetime to UseWindowsService after update dotnetcore version. https://github.com/aspnet/Extensions/issues/1288
                 .ConfigureServices(services =>
                 {
                     services.AddHostedService<Worker>();
