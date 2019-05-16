@@ -19,10 +19,8 @@ namespace ControlNet.MonitoringService.Models
 
         #region Constructors
 
-        public Monitoring(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Monitoring(IConfiguration configuration) 
+            => Configuration = configuration;
 
         #endregion
 
@@ -62,7 +60,7 @@ namespace ControlNet.MonitoringService.Models
             int warningLevel = 0;
             int delayNotification = 7; // Minutes.
 
-            DateTime? LastWarningTime = DateTime.Now.AddMinutes(0 - delayNotification);
+            DateTime? lastWarningTime = DateTime.Now.AddMinutes(0 - delayNotification);
 
             string message = string.Empty;
 
@@ -71,6 +69,7 @@ namespace ControlNet.MonitoringService.Models
                 var batteryStatus = int.Parse(MachineInformationService.GetBatteryStatus());
                 var batteryCharge = int.Parse(MachineInformationService.GetBatteryCharge());
 
+                // Battery doesn't charge.
                 if (batteryStatus == 1)
                 {
                     if (FunctionsHelper.Between(
@@ -81,8 +80,7 @@ namespace ControlNet.MonitoringService.Models
 
                         warningLevel = 1;
                     }
-                    else if (FunctionsHelper.Between(
-                        num: batteryCharge, lower: 0, upper: 10, inclusive: true))
+                    else if (batteryCharge <= 10)
                     {
                         message = $"Alarm[{MachineInformationService.GetMachineName()}]! \n" +
                             $"Battery level critical ({batteryCharge}%)!";
@@ -125,13 +123,14 @@ namespace ControlNet.MonitoringService.Models
 
                 var notificationtDataTime = DateTime.Now.AddMinutes(0 - delayNotification);
 
-                if (notificationtDataTime >= LastWarningTime && !string.IsNullOrEmpty(message))
+                if (notificationtDataTime >= lastWarningTime && !string.IsNullOrEmpty(message))
                 {
                     await SendReportAsync(message);
-                    LastWarningTime = DateTime.Now;
+                    lastWarningTime = DateTime.Now;
                     message = string.Empty;
                 }
 
+                // 3 minutes.
                 await Task.Delay(30000);
             }
         }
