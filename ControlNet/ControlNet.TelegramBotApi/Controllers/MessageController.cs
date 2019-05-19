@@ -47,6 +47,7 @@ namespace ControlNet.TelegramBotApi.Controllers
         [HttpPost(BotSettings.Token + "/SendMessage")]
         public async Task SendMessage(Message message)
         {
+            //TODO: Use method with Message type. 
             var chatId = message.Chat.Id;
             var textMessage = message.Text;
 

@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using ControlNet.TelegramBotApi.Models.Services.BotService.Commands;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Telegram.Bot.Types;
 
 namespace ControlNet.TelegramBotApi.Models.Services.BotService
@@ -13,7 +16,11 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
 
         Task SendMessage(long chatId, string textMessage);
 
+        Task SendMessage(long chatId, string textMessage, int replyToMessageId);
+
         Task SendMessage(Message message);
+
+        IEnumerable<Command> GetCommands();
 
         #endregion
     }
