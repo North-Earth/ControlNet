@@ -8,10 +8,9 @@ namespace ControlNet.MonitoringService.Models.Sevices
 {
     public static class MachineInformationService
     {
-
         #region Fields
 
-        private static readonly string _queryBatteryInfo = "SELECT * FROM Win32_Battery";
+        private const string _queryBatteryInfo = "SELECT * FROM Win32_Battery";
 
         #endregion
 
@@ -33,14 +32,20 @@ namespace ControlNet.MonitoringService.Models.Sevices
             return batteryCharge;
         }
 
+        public static bool IsCharging
+            => GetBatteryStatus() != "1";
+
         public static string GetBatteryStatus()
+            => BatteryStatus();
+
+        private static string BatteryStatus()
         {
             var objectName = "BatteryStatus";
 
-            var batteryCharge = ManagementInformationService
+            var batteryStatus = ManagementInformationService
                 .GetManagementInformation(_queryBatteryInfo, objectName);
 
-            return batteryCharge;
+            return batteryStatus;
         }
 
         #endregion

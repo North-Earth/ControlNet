@@ -20,14 +20,19 @@ namespace ControlNet.MonitoringService
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureLogging(loggerFactory => loggerFactory.AddEventLog()) // Send logs to the Windows Event Log.
-                .UseWindowsService() // Rename UseServiceBaseLifetime to UseWindowsService after update dotnetcore version. https://github.com/aspnet/Extensions/issues/1288
-                .ConfigureServices(services =>
-                {
-                    services.AddHostedService<Worker>();
-                    services.AddTransient<IMonitoring, Monitoring>();
-                });
+        public static IHostBuilder CreateHostBuilder(string[] args)
+            => Host.CreateDefaultBuilder(args)
+            .ConfigureLogging(loggerFactory => loggerFactory.AddEventLog()) // Send logs to the Windows Event Log.
+            .UseWindowsService() // Rename UseServiceBaseLifetime to UseWindowsService after update dotnetcore version. https://github.com/aspnet/Extensions/issues/1288
+            .ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                // Call other providers here and call AddCommandLine last.
+                config.AddCommandLine(args);
+            })
+            .ConfigureServices(services =>
+            {
+                services.AddHostedService<Worker>();
+                services.AddTransient<IMonitoring, Monitoring>();
+            });
     }
 }

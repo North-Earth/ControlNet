@@ -1,8 +1,10 @@
 ﻿using ControlNet.MonitoringService.Helpers;
 using ControlNet.MonitoringService.Models.Sevices;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
@@ -14,12 +16,13 @@ namespace ControlNet.MonitoringService.Models
         #region Fields
 
         public IConfiguration Configuration { get; }
+        //public object SetResource { get; private set; }
 
         #endregion
 
         #region Constructors
 
-        public Monitoring(IConfiguration configuration) 
+        public Monitoring(IConfiguration configuration)
             => Configuration = configuration;
 
         #endregion
@@ -28,17 +31,16 @@ namespace ControlNet.MonitoringService.Models
 
         public async Task StartServiceAsync()
         {
-            var batteryStatus = MachineInformationService.GetBatteryStatus() == "1" ? "Doesn't charge." : "Charging.";
-
             var message = $"{ MachineInformationService.GetMachineName() } Online. \n" +
                 $"Services started successfully. " +
                 $"[{DateTime.Now}] \n" +
                 $"Battery Charge: {MachineInformationService.GetBatteryCharge()}% \n" +
-                $"Status: {batteryStatus}";
+                $"Charging Status: {MachineInformationService.IsCharging}";
 
             await SendReportAsync(message);
 
-            await Task.Factory.StartNew(async () => await MonitoringBatteryCharge());
+            await Task.Factory.StartNew(async () => await BatteryChargeMonitoring());
+            await Task.Factory.StartNew(async () => await WorkTimeMonitoring());
         }
 
         public async Task SendReportAsync(string message)
@@ -55,22 +57,23 @@ namespace ControlNet.MonitoringService.Models
                 .SendPostRequest(botApiUrl, route: messageRoute, data);
         }
 
-        public async Task MonitoringBatteryCharge()
+        public async Task BatteryChargeMonitoring()
         {
+            Console.WriteLine("Task started BatteryChargeMonitoring");
             int warningLevel = 0;
-            int delayNotification = 7; // Minutes.
+            int delayNotificationMinutes = 7;
 
-            DateTime? lastWarningTime = DateTime.Now.AddMinutes(0 - delayNotification);
+            DateTime? lastWarningTime = DateTime.Now.AddMinutes(0 - delayNotificationMinutes);
 
             string message = string.Empty;
 
             while (true)
             {
-                var batteryStatus = int.Parse(MachineInformationService.GetBatteryStatus());
+                //var batteryStatus = int.Parse(MachineInformationService.GetBatteryStatus());
                 var batteryCharge = int.Parse(MachineInformationService.GetBatteryCharge());
 
                 // Battery doesn't charge.
-                if (batteryStatus == 1)
+                if (!MachineInformationService.IsCharging)
                 {
                     if (FunctionsHelper.Between(
                         num: batteryCharge, lower: 11, upper: 25, inclusive: true))
@@ -111,17 +114,17 @@ namespace ControlNet.MonitoringService.Models
                 switch (warningLevel)
                 {
                     case 0:
-                        delayNotification = 7;
+                        delayNotificationMinutes = 7;
                         break;
                     case 1:
-                        delayNotification = 3;
+                        delayNotificationMinutes = 3;
                         break;
                     case 2:
-                        delayNotification = 1;
+                        delayNotificationMinutes = 1;
                         break;
                 }
 
-                var notificationtDataTime = DateTime.Now.AddMinutes(0 - delayNotification);
+                var notificationtDataTime = DateTime.Now.AddMinutes(0 - delayNotificationMinutes);
 
                 if (notificationtDataTime >= lastWarningTime && !string.IsNullOrEmpty(message))
                 {
@@ -132,6 +135,50 @@ namespace ControlNet.MonitoringService.Models
 
                 // 3 minutes.
                 await Task.Delay(30000);
+            }
+        }
+
+        public async Task WorkTimeMonitoring()
+        {
+            string workTimeKey = "WorkTime";
+            string lastWorkTimeKey = "LastWorkTime";
+
+            DateTime currentDateTime = DateTime.Now;
+            var emptyTimeSpan = new TimeSpan().ToString();
+
+            while (true)
+            {
+                var workTime = TimeSpan.Parse(ResourcesService.GetResource(workTimeKey));
+                Console.WriteLine(workTime);
+
+                if (MachineInformationService.IsCharging)
+                {
+                    var message = $"Battery life statistics: {workTime.Hours}h:{workTime.Minutes}m:{workTime.Seconds}s";
+                    await SendReportAsync(message);
+
+                    if (workTime.ToString() != emptyTimeSpan.ToString())
+                    {
+                        ResourcesService.SetResource(workTimeKey, emptyTimeSpan);
+                        ResourcesService.SetResource(lastWorkTimeKey, workTime.ToString());
+                    }
+
+                    while (MachineInformationService.IsCharging)
+                    {
+                        // Waiting charging.
+                        await Task.Delay(1000);
+                    }
+                }
+                else
+                {
+                    var time = DateTime.Now - currentDateTime;
+                    currentDateTime = DateTime.Now;
+
+                    var newWorkTime = workTime + time;
+
+                    ResourcesService.SetResource(workTimeKey, newWorkTime.ToString());
+                }
+
+                await Task.Delay(1000);
             }
         }
 
