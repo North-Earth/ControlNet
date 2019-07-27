@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlNet.TelegramBotApi", "ControlNet.TelegramBotApi\ControlNet.TelegramBotApi.csproj", "{13AC3772-AB37-499C-A2D7-7257BAFD94B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlNet.MonitoringService", "ControlNet.MonitoringService\ControlNet.MonitoringService.csproj", "{8B06B16D-C091-4410-97D2-988827759DC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlNet.MonitoringService", "ControlNet.MonitoringService\ControlNet.MonitoringService.csproj", "{8B06B16D-C091-4410-97D2-988827759DC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlNet.MonitoringService.Tests", "ControlNet.MonitoringService.Tests\ControlNet.MonitoringService.Tests.csproj", "{729338EF-7861-456A-B7CF-8C6CB10DB4F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{8B06B16D-C091-4410-97D2-988827759DC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B06B16D-C091-4410-97D2-988827759DC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B06B16D-C091-4410-97D2-988827759DC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{729338EF-7861-456A-B7CF-8C6CB10DB4F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{729338EF-7861-456A-B7CF-8C6CB10DB4F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{729338EF-7861-456A-B7CF-8C6CB10DB4F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{729338EF-7861-456A-B7CF-8C6CB10DB4F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
