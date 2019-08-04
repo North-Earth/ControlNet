@@ -15,25 +15,36 @@ namespace ControlNet.MonitoringService
     {
         private readonly IConfiguration _configuration;
 
-        private readonly ILogger<Worker> _logger;
+        private readonly ILogger<Worker> _winLogger; //Windows events logger.
 
         private readonly IMonitoring _monitoring;
 
-        public Worker(IConfiguration configuration, ILogger<Worker> logger, IMonitoring monitoring)
+        private readonly IResourcesService _resourcesService;
+
+        private readonly ControlNet.Logger.ILogger _loger;
+
+        public Worker(IConfiguration configuration,
+            ILogger<Worker> winLogger,
+            IMonitoring monitoring,
+            IResourcesService resourcesService,
+            ControlNet.Logger.ILogger logger)
         {
             _configuration = configuration;
-            _logger = logger;
+            _winLogger = winLogger;
             _monitoring = monitoring;
+            _resourcesService = resourcesService;
+            _loger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await Logger("The service is running!");
+            await _loger.WriteInformationAsync("The service is running!");
+
             await StartAsync();
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation($"Worker running at: {DateTime.Now}");
+                _winLogger.LogInformation($"Worker running at: {DateTime.Now}");
                 await Task.Delay(10000, stoppingToken);
             }
         }
@@ -47,30 +58,22 @@ namespace ControlNet.MonitoringService
                 try
                 {
                     await _monitoring.StartServiceAsync();
-                    await Logger("The monitoring system is running!");
+                    await _loger.WriteInformationAsync("The monitoring system is running!");
                     isValid = true;
                 }
                 catch (Exception ex)
                 {
-                    await Logger("Unsuccessful the monitoring system startup.");
-                    await Logger(ex.Message);
-                    await Logger(ex.ToString());
+                    await _loger.WriteWarningAsync("Unsuccessful the monitoring system startup.");
+                    await _loger.WriteErrorAsync(ex.Message + "\n" + ex.ToString());
 
                     isValid = false;
 
                     // Waiting before restarting in case of unsuccessful start.
-                    await Logger("Waiting for the monitoring system to restart.");
+                    await _loger.WriteWarningAsync("Waiting for the monitoring system to restart.");
                     await Task.Delay(millisecondsDelay: 30000);
-                    await Logger("Restart the monitoring system.");
+                    await _loger.WriteWarningAsync("Restart the monitoring system.");
                 }
             }
-        }
-
-        private async Task Logger(string message)
-        {
-            string text = $"[{DateTime.Now}] {message} \n";
-
-            await File.AppendAllTextAsync(@"C:\Logs\ControlNetLog.txt", text);
         }
     }
 }

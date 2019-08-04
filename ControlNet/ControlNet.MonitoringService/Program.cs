@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using ControlNet.MonitoringService.Models.Sevices;
 using ControlNet.MonitoringService.Models;
+using ControlNet.Logger;
 
 namespace ControlNet.MonitoringService
 {
@@ -33,6 +34,8 @@ namespace ControlNet.MonitoringService
             {
                 services.AddHostedService<Worker>();
                 services.AddTransient<IMonitoring, Monitoring>();
+                services.AddTransient<IResourcesService, ResourcesService>();
+                services.AddTransient<ControlNet.Logger.ILogger, ControlNet.Logger.Logger>();
             });
     }
 }

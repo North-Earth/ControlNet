@@ -1,4 +1,5 @@
-﻿using ControlNet.MonitoringService.Helpers;
+﻿using ControlNet.Logger;
+using ControlNet.MonitoringService.Helpers;
 using ControlNet.MonitoringService.Models.Sevices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Protocols;
@@ -15,15 +16,22 @@ namespace ControlNet.MonitoringService.Models
     {
         #region Fields
 
-        public IConfiguration Configuration { get; }
-        //public object SetResource { get; private set; }
+        private IConfiguration Configuration { get; }
+
+        private ILogger Logger { get; }
+
+        private IResourcesService ResourcesService { get; }
 
         #endregion
 
         #region Constructors
 
-        public Monitoring(IConfiguration configuration)
-            => Configuration = configuration;
+        public Monitoring(IConfiguration configuration, ILogger logger, IResourcesService resourcesService)
+        {
+            Configuration = configuration;
+            Logger = logger;
+            ResourcesService = resourcesService;
+        }
 
         #endregion
 
@@ -39,8 +47,20 @@ namespace ControlNet.MonitoringService.Models
 
             await SendReportAsync(message);
 
-            await Task.Factory.StartNew(async () => await BatteryChargeMonitoring());
-            await Task.Factory.StartNew(async () => await WorkTimeMonitoring());
+            try
+            {
+                var tasks = new List<Task>()
+                {
+                    await Task.Factory.StartNew(async () => await BatteryChargeMonitoring(), TaskCreationOptions.LongRunning),
+                    await Task.Factory.StartNew(async () => await WorkTimeMonitoring(), TaskCreationOptions.LongRunning)
+                };
+
+                Task.WaitAll(tasks.ToArray());
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task SendReportAsync(string message)
@@ -55,11 +75,13 @@ namespace ControlNet.MonitoringService.Models
 
             await RestClientService<Message>
                 .SendPostRequest(botApiUrl, route: messageRoute, data);
+
+            await Logger.WriteInformationAsync("Send message:\n" + message);
         }
 
         public async Task BatteryChargeMonitoring()
         {
-            Console.WriteLine("Task started BatteryChargeMonitoring");
+            await Logger.WriteInformationAsync("BatteryChargeMonitoring is running.");
             int warningLevel = 0;
             int delayNotificationMinutes = 7;
 
@@ -69,7 +91,6 @@ namespace ControlNet.MonitoringService.Models
 
             while (true)
             {
-                //var batteryStatus = int.Parse(MachineInformationService.GetBatteryStatus());
                 var batteryCharge = int.Parse(MachineInformationService.GetBatteryCharge());
 
                 // Battery doesn't charge.
@@ -140,6 +161,8 @@ namespace ControlNet.MonitoringService.Models
 
         public async Task WorkTimeMonitoring()
         {
+            await Logger.WriteInformationAsync("WorkTimeMonitoring is running.");
+
             string workTimeKey = "WorkTime";
             string lastWorkTimeKey = "LastWorkTime";
 
@@ -148,11 +171,28 @@ namespace ControlNet.MonitoringService.Models
 
             while (true)
             {
-                var workTime = TimeSpan.Parse(ResourcesService.GetResource(workTimeKey));
-                Console.WriteLine(workTime);
+                var workTime = new TimeSpan();
+
+                try
+                {
+                    workTime = TimeSpan.Parse(ResourcesService.GetResource(workTimeKey));
+                }
+                catch (ArgumentNullException ex)
+                {
+                    await Logger.WriteErrorAsync("WorkTimeMonitoring: Resource file is not found.");
+                    await Logger.WriteWarningAsync("WorkTimeMonitoring is stopped.");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    await Logger.WriteErrorAsync(ex.ToString());
+                    throw ex;
+                }
 
                 if (MachineInformationService.IsCharging)
                 {
+                    await Logger.WriteDebugAsync($"WorkTimeMonitoring: Battery is charging: {MachineInformationService.IsCharging}");
+
                     var message = $"Battery life statistics: {workTime.Hours}h:{workTime.Minutes}m:{workTime.Seconds}s";
                     await SendReportAsync(message);
 

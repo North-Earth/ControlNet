@@ -16,6 +16,12 @@ namespace ControlNet.MonitoringService.Models.Sevices
 
         #region Methods
 
+        public static string GetAppDirectory()
+        {
+            var dir = AppDomain.CurrentDomain.BaseDirectory;
+            return dir;
+        }
+
         public static string GetMachineName()
         {
             var machineName = Environment.MachineName;
