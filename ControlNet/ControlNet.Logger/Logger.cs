@@ -35,7 +35,7 @@ namespace ControlNet.Logger
         private async Task Write(string message, string prefix, ConsoleColor prefixColor)
         {
             var dateTime = DateTime.Now.ToString();
-            var log = $" [{dateTime}]: {message}";
+            var log = $"[{dateTime}] - {message}";
 
             WriteToConsole(log, prefix, prefixColor);
             await WriteToFileAsync($"{prefix}{log}");
@@ -44,21 +44,25 @@ namespace ControlNet.Logger
         private void WriteToConsole(string message, string prefix, ConsoleColor prefixColor)
         {
             Console.ForegroundColor = prefixColor;
-            Console.Write(prefix);
+            Console.Write($"{prefix}: ");
             Console.ResetColor();
 
-            Console.WriteLine(message);
+            var logMessage = message.Replace("\n", "\n\t");
+            Console.WriteLine(logMessage);
         }
 
         private async Task WriteToFileAsync(string message)
         {
+            var currentDate = DateTime.Now.ToShortDateString();
+
             var appDir = AppDomain.CurrentDomain.BaseDirectory;
             var logsDir = $@"{appDir}Logs";
             if (!Directory.Exists(logsDir))
                 Directory.CreateDirectory(logsDir);
-            var path = $@"{logsDir}\log.txt";
+            var path = $@"{logsDir}\log({currentDate}).txt";
+            var logMessage = message.Replace("\n", "\n\t");
 
-            await File.AppendAllTextAsync(path, message + "\n");
+            await File.AppendAllTextAsync(path, $"{logMessage}\n");
         }
 
         public async Task WriteInformationAsync(string message)

@@ -55,12 +55,17 @@ namespace ControlNet.MonitoringService.Models.Sevices
             else // Make changes.
             {
                 Configuration.AppSettings.Settings[resourceKey].Value = resourceValue;
-                Logger.WriteInformationAsync($"Resource {resourceKey} has been edited.");
+                //Logger.WriteInformationAsync($"Resource {resourceKey} has been edited.");
             }
 
             // Save to apply changes.
             Configuration.Save(ConfigurationSaveMode.Modified);
             ConfigurationManager.RefreshSection(settingsSection);
+        }
+
+        public void AddResource(string resourceKey, string resourceValue)
+        {
+            throw new NotImplementedException(); //TODO;
         }
 
         #endregion
