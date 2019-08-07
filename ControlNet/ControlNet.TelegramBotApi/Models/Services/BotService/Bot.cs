@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using ControlNet.TelegramBotApi.Models.Services.BotService.Commands;
-using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -12,9 +11,9 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
     {
         #region Fields
 
-        private readonly ITelegramBotClient _client;
+        private ITelegramBotClient Client { get; }
 
-        private readonly IEnumerable<Command> _commands;
+        private IEnumerable<Command> Commands { get; }
 
         #endregion
 
@@ -22,9 +21,9 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
 
         public Bot(ITelegramBotClient client)
         {
-            _client = client;
+            Client = client;
 
-            _commands = new List<Command>
+            Commands = new List<Command>
             {
                 new StartCommand()
                 //TODO: Next commands.
@@ -35,21 +34,31 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
 
         #region Methods
 
+        /// <summary>
+        /// WebHook installation for the bot.
+        /// </summary>
+        /// <param name="webhookUrl"></param>
+        /// <returns></returns>
         public async Task SetWebhookAsync(string webhookUrl)
         {
-            await _client.SetWebhookAsync(webhookUrl);
+            await Client.SetWebhookAsync(webhookUrl);
         }
 
+        /// <summary>
+        /// Processing received messages and commands using a WebHook.
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
         public async Task MessageHandling(Update update)
         {
             var message = update.Message;
             var command = GetCommands().Where(cmd => cmd.Name == message.Text)?.FirstOrDefault();
 
-            var replyMessage = new Message { Text = "🤔"};
+            var replyMessage = new Message { Text = "🤔" };
 
             if (command != null)
                 replyMessage = command.Execute(message.Chat.FirstName);
-            
+
 
             //TODO: Use other overload SendMessage.
             await SendMessage(chatId: message.Chat.Id, textMessage: replyMessage.Text, replyToMessageId: message.MessageId);
@@ -57,11 +66,11 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
             //await SendMessage(replyMessage);
         }
 
-        public async Task SendMessage(long chatId, string textMessage) 
-            => await _client.SendTextMessageAsync(chatId: chatId, text: textMessage);
+        public async Task SendMessage(long chatId, string textMessage)
+            => await Client.SendTextMessageAsync(chatId: chatId, text: textMessage);
 
         public async Task SendMessage(long chatId, string textMessage, int replyToMessageId)
-            => await _client.SendTextMessageAsync(chatId: chatId, text: textMessage, replyToMessageId: replyToMessageId);
+            => await Client.SendTextMessageAsync(chatId: chatId, text: textMessage, replyToMessageId: replyToMessageId);
 
         public Task SendMessage(Message message)
         {
@@ -69,7 +78,7 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<Command> GetCommands() => _commands;
+        public IEnumerable<Command> GetCommands() => Commands;
 
         #endregion
 

@@ -1,30 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ControlNet.TelegramBotApi.Models;
 using ControlNet.TelegramBotApi.Models.Services.BotService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
 
 namespace ControlNet.TelegramBotApi.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class MessageController : ControllerBase
     {
         #region Fields
 
-        private readonly IBot _bot;
+        private IBot Bot { get; }
 
         #endregion
 
         #region Constructors
 
         public MessageController(IBot bot)
-            => _bot = bot;
+        {
+            Bot = bot;
+        }
 
         #endregion
 
@@ -33,17 +30,20 @@ namespace ControlNet.TelegramBotApi.Controllers
         // GET: api/Message/[Token]
         [HttpGet]
         [Route(BotSettings.Token)]
-        public async Task<IActionResult> Get()
-        {
-            return Ok();
-        }
+        public IActionResult Get() => Ok();
 
         // POST: api/Message/[Token]
         [HttpPost]
         [Route(BotSettings.Token)]
         public async Task Post([FromBody] Update update)
-            => await _bot.MessageHandling(update);
+            => await Bot.MessageHandling(update);
 
+        /// POST: api/Message/[Token]/SendMessage
+        /// <summary>
+        /// Telegram message sending.
+        /// </summary>
+        /// <param name="message">TelegramApi Message</param>
+        /// <returns></returns>
         [HttpPost(BotSettings.Token + "/SendMessage")]
         public async Task SendMessage(Message message)
         {
@@ -51,7 +51,7 @@ namespace ControlNet.TelegramBotApi.Controllers
             var chatId = message.Chat.Id;
             var textMessage = message.Text;
 
-            await _bot.SendMessage(chatId, textMessage);
+            await Bot.SendMessage(chatId, textMessage);
         }
 
         #endregion

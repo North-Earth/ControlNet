@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using ControlNet.TelegramBotApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ControlNet.TelegramBotApi.Controllers
@@ -22,7 +21,7 @@ namespace ControlNet.TelegramBotApi.Controllers
         #region Methods
 
         [HttpGet]
-        public async Task<string> Get()
+        public string Get()
         {
             return "Hello! I'm Telegergam Bot API. :)";
         }
