@@ -13,10 +13,6 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
 
         Task MessageHandling(Update update);
 
-        Task SendMessage(long chatId, string textMessage);
-
-        Task SendMessage(long chatId, string textMessage, int replyToMessageId);
-
         Task SendMessage(Message message);
 
         IEnumerable<Command> GetCommands();

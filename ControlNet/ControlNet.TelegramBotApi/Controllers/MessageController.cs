@@ -33,6 +33,11 @@ namespace ControlNet.TelegramBotApi.Controllers
         public IActionResult Get() => Ok();
 
         // POST: api/Message/[Token]
+        /// <summary>
+        /// Webhook sends messages for this bot using this method.
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route(BotSettings.Token)]
         public async Task Post([FromBody] Update update)
@@ -45,14 +50,8 @@ namespace ControlNet.TelegramBotApi.Controllers
         /// <param name="message">TelegramApi Message</param>
         /// <returns></returns>
         [HttpPost(BotSettings.Token + "/SendMessage")]
-        public async Task SendMessage(Message message)
-        {
-            //TODO: Use method with Message type. 
-            var chatId = message.Chat.Id;
-            var textMessage = message.Text;
-
-            await Bot.SendMessage(chatId, textMessage);
-        }
+        public async Task SendMessage(Message message) 
+            => await Bot.SendMessage(message);
 
         #endregion
     }

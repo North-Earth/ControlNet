@@ -54,28 +54,33 @@ namespace ControlNet.TelegramBotApi.Models.Services.BotService
             var message = update.Message;
             var command = GetCommands().Where(cmd => cmd.Name == message.Text)?.FirstOrDefault();
 
-            var replyMessage = new Message { Text = "🤔" };
+            var replyMessage = new Message { Chat = message.Chat, Text = "🤔" };
 
             if (command != null)
+            {
                 replyMessage = command.Execute(message.Chat.FirstName);
+                replyMessage.Chat = message.Chat;
+            }
 
-
-            //TODO: Use other overload SendMessage.
-            await SendMessage(chatId: message.Chat.Id, textMessage: replyMessage.Text, replyToMessageId: message.MessageId);
-
-            //await SendMessage(replyMessage);
+            await SendMessage(replyMessage);
         }
 
-        public async Task SendMessage(long chatId, string textMessage)
-            => await Client.SendTextMessageAsync(chatId: chatId, text: textMessage);
-
-        public async Task SendMessage(long chatId, string textMessage, int replyToMessageId)
-            => await Client.SendTextMessageAsync(chatId: chatId, text: textMessage, replyToMessageId: replyToMessageId);
-
-        public Task SendMessage(Message message)
+        public async Task SendMessage(Message message)
         {
-            //TODO: Create parse message.
-            throw new System.NotImplementedException();
+            if (message.Text != null)
+            {
+                try
+                {
+                    var answer = await Client.SendTextMessageAsync(message.Chat.Id, message.Text);
+                }
+                catch (System.Exception)
+                {
+                    //TODO: Write logs to Data Base.
+                    throw;
+                }
+            }
+
+            //TODO: Parse other type mesages.
         }
 
         public IEnumerable<Command> GetCommands() => Commands;
